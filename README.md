@@ -1,59 +1,203 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SmartBucket - Expense Tracker API
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="https://img.shields.io/badge/Laravel-11-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 11">
+  <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.2+">
+  <img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License">
 </p>
 
-## About Laravel
+A robust RESTful API for personal expense tracking and budget management, built with Laravel 11.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ✨ Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- 🔐 **Authentication** - Secure token-based auth with Laravel Sanctum
+- 💰 **Expense Management** - Full CRUD operations with filtering & pagination
+- 💵 **Income Tracking** - Monthly income management with history
+- 📂 **Categories** - Customizable expense categories with icons & colors
+- 📊 **Dashboard Analytics** - Spending insights, trends, and breakdowns
+- 📤 **Export** - Export data to CSV, PDF, or Excel
+- 🌐 **Multi-language** - English and Arabic support
+- 🔒 **Role-based Access** - Permissions with Spatie Laravel Permission
+- 📖 **API Documentation** - Swagger/OpenAPI documentation
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🚀 Quick Start
 
-## Learning Laravel
+### Prerequisites
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- PHP 8.2+
+- Composer
+- MySQL 8.0+
+- Node.js 18+ (for frontend assets)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Installation
 
-## Laravel Sponsors
+1. **Clone the repository**
+```bash
+git clone https://github.com/Abdalrhmankhashashneh/expense-tracker-api.git
+cd expense-tracker-api
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+2. **Install dependencies**
+```bash
+composer install
+npm install
+```
 
-### Premium Partners
+3. **Environment setup**
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+4. **Configure database** in `.env`
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=expense_tracker
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
 
-## Contributing
+5. **Run migrations and seeders**
+```bash
+php artisan migrate
+php artisan db:seed
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+6. **Start the server**
+```bash
+php artisan serve
+```
 
-## Code of Conduct
+The API will be available at `http://localhost:8000/api`
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 📚 API Endpoints
 
-## Security Vulnerabilities
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Register new user |
+| POST | `/api/auth/login` | Login user |
+| POST | `/api/auth/logout` | Logout user |
+| GET | `/api/auth/user` | Get authenticated user |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Expenses
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/expenses` | List all expenses |
+| POST | `/api/expenses` | Create expense |
+| GET | `/api/expenses/{id}` | Get expense details |
+| PUT | `/api/expenses/{id}` | Update expense |
+| DELETE | `/api/expenses/{id}` | Delete expense |
+| GET | `/api/expenses/summary` | Get expense summary |
 
-## License
+### Income
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/income` | List all income records |
+| POST | `/api/income` | Create income |
+| GET | `/api/income/current` | Get current month income |
+| GET | `/api/income/history` | Get income history |
+| PUT | `/api/income/{id}` | Update income |
+| DELETE | `/api/income/{id}` | Delete income |
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Categories
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/categories` | List all categories |
+| POST | `/api/categories` | Create category |
+| GET | `/api/categories/{id}` | Get category details |
+| PUT | `/api/categories/{id}` | Update category |
+| DELETE | `/api/categories/{id}` | Delete category |
+
+### Dashboard
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/dashboard` | Get dashboard overview |
+| GET | `/api/dashboard/trends` | Get spending trends |
+| GET | `/api/dashboard/category-breakdown` | Get category breakdown |
+
+### Export
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/export/csv` | Export as CSV |
+| GET | `/api/export/pdf` | Export as PDF |
+| GET | `/api/export/excel` | Export as Excel |
+| GET | `/api/export/history` | Get export history |
+
+### Settings
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/settings` | Get user settings |
+| PUT | `/api/settings/profile` | Update profile |
+| PUT | `/api/settings/password` | Change password |
+
+## 🔧 Configuration
+
+### CORS
+Configure allowed origins in `config/cors.php`:
+```php
+'allowed_origins' => [
+    env('FRONTEND_URL', 'http://localhost:5173'),
+],
+```
+
+### Sanctum
+Token expiration can be configured in `config/sanctum.php`.
+
+## 📖 API Documentation
+
+Swagger documentation is available at `/api/documentation` when running locally.
+
+Generate/update docs:
+```bash
+php artisan l5-swagger:generate
+```
+
+## 🧪 Testing
+
+```bash
+php artisan test
+```
+
+## 📁 Project Structure
+
+```
+app/
+├── Http/
+│   ├── Controllers/Api/    # API Controllers
+│   ├── Middleware/         # Custom middleware
+│   ├── Requests/           # Form requests
+│   └── Resources/          # API Resources
+├── Models/                 # Eloquent models
+├── Policies/               # Authorization policies
+└── Providers/              # Service providers
+
+database/
+├── migrations/             # Database migrations
+├── seeders/               # Database seeders
+└── factories/             # Model factories
+
+routes/
+└── api.php                # API routes
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👤 Author
+
+**Abdalrhman Khashashneh**
+
+- GitHub: [@Abdalrhmankhashashneh](https://github.com/Abdalrhmankhashashneh)
