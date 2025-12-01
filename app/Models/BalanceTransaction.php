@@ -34,8 +34,10 @@ class BalanceTransaction extends Model
     public const SOURCE_INVESTMENT = 'investment';
     public const SOURCE_REFUND = 'refund';
     public const SOURCE_TRANSFER = 'transfer';
+    public const SOURCE_EXPENSE = 'expense';
     public const SOURCE_OTHER = 'other';
 
+    // Sources available for user to add money (excludes expense)
     public const SOURCES = [
         self::SOURCE_SALARY,
         self::SOURCE_FREELANCE,
@@ -43,6 +45,18 @@ class BalanceTransaction extends Model
         self::SOURCE_INVESTMENT,
         self::SOURCE_REFUND,
         self::SOURCE_TRANSFER,
+        self::SOURCE_OTHER,
+    ];
+
+    // All sources including expense (for internal use)
+    public const ALL_SOURCES = [
+        self::SOURCE_SALARY,
+        self::SOURCE_FREELANCE,
+        self::SOURCE_GIFT,
+        self::SOURCE_INVESTMENT,
+        self::SOURCE_REFUND,
+        self::SOURCE_TRANSFER,
+        self::SOURCE_EXPENSE,
         self::SOURCE_OTHER,
     ];
 
@@ -105,6 +119,7 @@ class BalanceTransaction extends Model
             self::SOURCE_INVESTMENT => 'Investment',
             self::SOURCE_REFUND => 'Refund',
             self::SOURCE_TRANSFER => 'Transfer',
+            self::SOURCE_EXPENSE => 'Expense',
             self::SOURCE_OTHER => 'Other',
             default => 'Unknown',
         };

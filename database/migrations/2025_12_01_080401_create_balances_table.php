@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->decimal('current_balance', 15, 2)->default(0);
             $table->timestamps();
-            
+
             $table->unique('user_id'); // Each user has one balance record
         });
 
@@ -32,7 +32,7 @@ return new class extends Migration
             $table->decimal('balance_after', 15, 2); // Balance after this transaction
             $table->foreignId('expense_id')->nullable()->constrained()->onDelete('set null'); // Link to expense if debit
             $table->timestamps();
-            
+
             $table->index(['user_id', 'created_at']);
         });
     }

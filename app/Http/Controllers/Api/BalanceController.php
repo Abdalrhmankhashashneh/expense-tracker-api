@@ -21,7 +21,7 @@ class BalanceController extends Controller
 {
     /**
      * Get current user's balance.
-     * 
+     *
      * @OA\Get(
      *     path="/api/balance",
      *     summary="Get current balance",
@@ -49,7 +49,7 @@ class BalanceController extends Controller
 
     /**
      * Add money to balance.
-     * 
+     *
      * @OA\Post(
      *     path="/api/balance/add",
      *     summary="Add money to balance",
@@ -105,7 +105,7 @@ class BalanceController extends Controller
 
     /**
      * Get balance transaction history.
-     * 
+     *
      * @OA\Get(
      *     path="/api/balance/transactions",
      *     summary="Get transaction history",
@@ -166,7 +166,7 @@ class BalanceController extends Controller
 
     /**
      * Get available money sources.
-     * 
+     *
      * @OA\Get(
      *     path="/api/balance/sources",
      *     summary="Get available money sources",

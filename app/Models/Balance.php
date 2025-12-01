@@ -76,8 +76,27 @@ class Balance extends Model
             'user_id' => $this->user_id,
             'type' => 'debit',
             'amount' => $amount,
-            'source' => 'other',
+            'source' => $expenseId ? BalanceTransaction::SOURCE_EXPENSE : BalanceTransaction::SOURCE_OTHER,
             'description' => $description,
+            'balance_after' => $this->current_balance,
+            'expense_id' => $expenseId,
+        ]);
+    }
+
+    /**
+     * Refund money to balance (when expense is deleted or updated).
+     */
+    public function refundMoney(float $amount, ?int $expenseId = null, ?string $description = null): BalanceTransaction
+    {
+        $this->current_balance += $amount;
+        $this->save();
+
+        return BalanceTransaction::create([
+            'user_id' => $this->user_id,
+            'type' => 'credit',
+            'amount' => $amount,
+            'source' => BalanceTransaction::SOURCE_REFUND,
+            'description' => $description ?? 'Expense refund',
             'balance_after' => $this->current_balance,
             'expense_id' => $expenseId,
         ]);

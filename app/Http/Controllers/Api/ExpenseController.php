@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ExpenseRequest;
 use App\Http\Resources\ExpenseResource;
 use App\Models\Expense;
+use App\Models\BalanceTransaction;
 use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
@@ -124,6 +125,15 @@ class ExpenseController extends Controller
         $expense = $request->user()->expenses()->create($request->validated());
         $expense->load('category');
 
+        // Deduct from user's balance
+        $balance = $request->user()->getOrCreateBalance();
+        $categoryName = $expense->category?->name ?? 'Expense';
+        $balance->deductMoney(
+            $expense->amount,
+            $expense->id,
+            $expense->note ?? $categoryName
+        );
+
         return response()->json([
             'success' => true,
             'message' => __('messages.expense.created'),
@@ -214,8 +224,24 @@ class ExpenseController extends Controller
     {
         $this->authorize('update', $expense);
 
+        $oldAmount = $expense->amount;
         $expense->update($request->validated());
         $expense->load('category');
+
+        // Adjust balance if amount changed
+        $amountDiff = $expense->amount - $oldAmount;
+        if ($amountDiff != 0) {
+            $balance = $request->user()->getOrCreateBalance();
+            $categoryName = $expense->category?->name ?? 'Expense';
+            
+            if ($amountDiff > 0) {
+                // Expense increased - deduct more
+                $balance->deductMoney($amountDiff, $expense->id, "Updated: {$categoryName}");
+            } else {
+                // Expense decreased - refund the difference
+                $balance->refundMoney(abs($amountDiff), $expense->id, "Updated: {$categoryName}");
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -255,6 +281,16 @@ class ExpenseController extends Controller
     public function destroy(Expense $expense)
     {
         $this->authorize('delete', $expense);
+
+        // Refund the amount to user's balance
+        $user = $expense->user;
+        $balance = $user->getOrCreateBalance();
+        $categoryName = $expense->category?->name ?? 'Expense';
+        $balance->refundMoney(
+            $expense->amount,
+            $expense->id,
+            "Deleted: {$categoryName}"
+        );
 
         $expense->delete();
 
