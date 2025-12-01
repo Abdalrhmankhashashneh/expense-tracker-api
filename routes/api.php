@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\IncomeController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CurrencyController;
+use App\Http\Controllers\Api\BalanceController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\SettingsController;
@@ -59,6 +60,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/active', [CurrencyController::class, 'active']);
         Route::put('/set', [CurrencyController::class, 'set']);
         Route::get('/{currency}', [CurrencyController::class, 'show']);
+    });
+
+    // Balance Management Routes
+    Route::prefix('balance')->group(function () {
+        Route::get('/', [BalanceController::class, 'index']);
+        Route::post('/add', [BalanceController::class, 'addMoney']);
+        Route::get('/transactions', [BalanceController::class, 'transactions']);
+        Route::get('/sources', [BalanceController::class, 'sources']);
     });
 
     // Dashboard Routes

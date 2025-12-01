@@ -14,7 +14,7 @@ return new class extends Migration
     {
         // First, convert existing string values to JSON format
         $currencies = DB::table('currencies')->get();
-        
+
         foreach ($currencies as $currency) {
             $name = $currency->name;
             // If it's already JSON, skip
@@ -38,7 +38,7 @@ return new class extends Migration
     {
         // Convert JSON back to string (use English name)
         $currencies = DB::table('currencies')->get();
-        
+
         foreach ($currencies as $currency) {
             $name = json_decode($currency->name, true);
             if (is_array($name)) {

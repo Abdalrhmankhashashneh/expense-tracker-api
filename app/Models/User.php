@@ -120,6 +120,33 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the user's balance.
+     */
+    public function balance()
+    {
+        return $this->hasOne(Balance::class);
+    }
+
+    /**
+     * Get the user's balance transactions.
+     */
+    public function balanceTransactions()
+    {
+        return $this->hasMany(BalanceTransaction::class);
+    }
+
+    /**
+     * Get or create the user's balance.
+     */
+    public function getOrCreateBalance(): Balance
+    {
+        return $this->balance ?? Balance::create([
+            'user_id' => $this->id,
+            'current_balance' => 0,
+        ]);
+    }
+
+    /**
      * Get all categories accessible by the user (default + custom).
      */
     public function allAccessibleCategories()

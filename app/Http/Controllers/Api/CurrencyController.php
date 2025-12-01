@@ -67,7 +67,7 @@ class CurrencyController extends Controller
     public function default()
     {
         $currency = Currency::getDefault();
-        
+
         if ($currency) {
             $currency->translated_name = $currency->translatedName;
         }
