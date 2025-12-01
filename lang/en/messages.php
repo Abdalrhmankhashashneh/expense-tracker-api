@@ -109,4 +109,10 @@ return [
         'profile_updated' => 'Profile updated successfully',
         'password_changed' => 'Password changed successfully. Please login again.',
     ],
+
+    // Currency
+    'currency' => [
+        'updated' => 'Currency preference updated successfully',
+        'inactive' => 'Selected currency is not available',
+    ],
 ];

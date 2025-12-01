@@ -18,6 +18,7 @@ use Spatie\Permission\Traits\HasRoles;
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="John Doe"),
  *     @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+ *     @OA\Property(property="currency_id", type="integer", nullable=true, example=1),
  *     @OA\Property(property="email_verified_at", type="string", format="date-time", nullable=true),
  *     @OA\Property(property="created_at", type="string", format="date-time"),
  *     @OA\Property(property="updated_at", type="string", format="date-time")
@@ -42,6 +43,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'currency_id',
     ];
 
     /**
@@ -73,6 +75,14 @@ class User extends Authenticatable
     public function incomes()
     {
         return $this->hasMany(Income::class);
+    }
+
+    /**
+     * Get the user's preferred currency.
+     */
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
     }
 
     /**

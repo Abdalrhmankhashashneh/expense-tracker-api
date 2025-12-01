@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\IncomeController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CurrencyController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\SettingsController;
@@ -50,6 +51,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Category Management Routes
     Route::apiResource('categories', CategoryController::class);
+
+    // Currency Management Routes
+    Route::prefix('currencies')->group(function () {
+        Route::get('/', [CurrencyController::class, 'index']);
+        Route::get('/default', [CurrencyController::class, 'default']);
+        Route::get('/active', [CurrencyController::class, 'active']);
+        Route::put('/set', [CurrencyController::class, 'set']);
+        Route::get('/{currency}', [CurrencyController::class, 'show']);
+    });
 
     // Dashboard Routes
     Route::prefix('dashboard')->middleware('permission:view dashboard')->group(function () {
