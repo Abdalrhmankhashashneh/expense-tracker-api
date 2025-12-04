@@ -35,9 +35,15 @@ class BalanceTransaction extends Model
     public const SOURCE_REFUND = 'refund';
     public const SOURCE_TRANSFER = 'transfer';
     public const SOURCE_EXPENSE = 'expense';
+    public const SOURCE_DEBT_PAYMENT = 'debt_payment';
+    public const SOURCE_LENDING = 'lending';
+    public const SOURCE_LENDING_RETURN = 'lending_return';
+    public const SOURCE_TARGET_SAVING = 'target_saving';
+    public const SOURCE_TARGET_PURCHASE = 'target_purchase';
+    public const SOURCE_TARGET_REFUND = 'target_refund';
     public const SOURCE_OTHER = 'other';
 
-    // Sources available for user to add money (excludes expense)
+    // Sources available for user to add money (excludes expense and debt_payment)
     public const SOURCES = [
         self::SOURCE_SALARY,
         self::SOURCE_FREELANCE,
@@ -48,7 +54,7 @@ class BalanceTransaction extends Model
         self::SOURCE_OTHER,
     ];
 
-    // All sources including expense (for internal use)
+    // All sources including expense and debt_payment (for internal use)
     public const ALL_SOURCES = [
         self::SOURCE_SALARY,
         self::SOURCE_FREELANCE,
@@ -57,6 +63,12 @@ class BalanceTransaction extends Model
         self::SOURCE_REFUND,
         self::SOURCE_TRANSFER,
         self::SOURCE_EXPENSE,
+        self::SOURCE_DEBT_PAYMENT,
+        self::SOURCE_LENDING,
+        self::SOURCE_LENDING_RETURN,
+        self::SOURCE_TARGET_SAVING,
+        self::SOURCE_TARGET_PURCHASE,
+        self::SOURCE_TARGET_REFUND,
         self::SOURCE_OTHER,
     ];
 
@@ -68,6 +80,7 @@ class BalanceTransaction extends Model
         'description',
         'balance_after',
         'expense_id',
+        'lending_id',
     ];
 
     protected $casts = [
@@ -89,6 +102,14 @@ class BalanceTransaction extends Model
     public function expense(): BelongsTo
     {
         return $this->belongsTo(Expense::class);
+    }
+
+    /**
+     * Get the lending associated with this transaction.
+     */
+    public function lending(): BelongsTo
+    {
+        return $this->belongsTo(Lending::class);
     }
 
     /**
@@ -120,6 +141,12 @@ class BalanceTransaction extends Model
             self::SOURCE_REFUND => 'Refund',
             self::SOURCE_TRANSFER => 'Transfer',
             self::SOURCE_EXPENSE => 'Expense',
+            self::SOURCE_DEBT_PAYMENT => 'Debt Payment',
+            self::SOURCE_LENDING => 'Lending',
+            self::SOURCE_LENDING_RETURN => 'Lending Return',
+            self::SOURCE_TARGET_SAVING => 'Target Saving',
+            self::SOURCE_TARGET_PURCHASE => 'Target Purchase',
+            self::SOURCE_TARGET_REFUND => 'Target Refund',
             self::SOURCE_OTHER => 'Other',
             default => 'Unknown',
         };

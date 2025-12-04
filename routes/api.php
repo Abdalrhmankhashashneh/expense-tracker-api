@@ -7,6 +7,9 @@ use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CurrencyController;
 use App\Http\Controllers\Api\BalanceController;
+use App\Http\Controllers\Api\DebtController;
+use App\Http\Controllers\LendingController;
+use App\Http\Controllers\TargetController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\SettingsController;
@@ -69,6 +72,27 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/transactions', [BalanceController::class, 'transactions']);
         Route::get('/sources', [BalanceController::class, 'sources']);
     });
+
+    // Debt Management Routes
+    Route::prefix('debts')->group(function () {
+        Route::get('/statistics', [DebtController::class, 'statistics']);
+        Route::get('/{debt}/payments', [DebtController::class, 'payments']);
+        Route::post('/{debt}/payments', [DebtController::class, 'recordPayment']);
+    });
+    Route::apiResource('debts', DebtController::class);
+
+    // Lending Management Routes (Money lent to others)
+    Route::prefix('lendings')->group(function () {
+        Route::get('/{lending}/payments', [LendingController::class, 'getPayments']);
+        Route::post('/{lending}/payments', [LendingController::class, 'recordPayment']);
+        Route::delete('/{lending}/payments/{payment}', [LendingController::class, 'deletePayment']);
+        Route::post('/{lending}/forgive', [LendingController::class, 'forgive']);
+    });
+    Route::apiResource('lendings', LendingController::class);
+
+    // Targets Management Routes (Wishlist)
+    Route::post('targets/{target}/purchase', [TargetController::class, 'purchase']);
+    Route::apiResource('targets', TargetController::class);
 
     // Dashboard Routes
     Route::prefix('dashboard')->middleware('permission:view dashboard')->group(function () {

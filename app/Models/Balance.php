@@ -101,4 +101,61 @@ class Balance extends Model
             'expense_id' => $expenseId,
         ]);
     }
+
+    /**
+     * Deduct money for lending (when user lends money to someone).
+     */
+    public function deductForLending(float $amount, int $lendingId, string $borrowerName): BalanceTransaction
+    {
+        $this->current_balance -= $amount;
+        $this->save();
+
+        return BalanceTransaction::create([
+            'user_id' => $this->user_id,
+            'type' => 'debit',
+            'amount' => $amount,
+            'source' => BalanceTransaction::SOURCE_LENDING,
+            'description' => "Lent to {$borrowerName}",
+            'balance_after' => $this->current_balance,
+            'lending_id' => $lendingId,
+        ]);
+    }
+
+    /**
+     * Add money when lending is returned (payment received).
+     */
+    public function addLendingReturn(float $amount, int $lendingId, string $borrowerName): BalanceTransaction
+    {
+        $this->current_balance += $amount;
+        $this->save();
+
+        return BalanceTransaction::create([
+            'user_id' => $this->user_id,
+            'type' => 'credit',
+            'amount' => $amount,
+            'source' => BalanceTransaction::SOURCE_LENDING_RETURN,
+            'description' => "Payment from {$borrowerName}",
+            'balance_after' => $this->current_balance,
+            'lending_id' => $lendingId,
+        ]);
+    }
+
+    /**
+     * Refund lending (when lending is deleted).
+     */
+    public function refundLending(float $amount, int $lendingId, string $borrowerName): BalanceTransaction
+    {
+        $this->current_balance += $amount;
+        $this->save();
+
+        return BalanceTransaction::create([
+            'user_id' => $this->user_id,
+            'type' => 'credit',
+            'amount' => $amount,
+            'source' => BalanceTransaction::SOURCE_REFUND,
+            'description' => "Lending to {$borrowerName} cancelled",
+            'balance_after' => $this->current_balance,
+            'lending_id' => $lendingId,
+        ]);
+    }
 }

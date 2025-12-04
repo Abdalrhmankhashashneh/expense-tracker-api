@@ -136,6 +136,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Get all debts for the user.
+     */
+    public function debts()
+    {
+        return $this->hasMany(Debt::class);
+    }
+
+    /**
+     * Get all debt payments for the user.
+     */
+    public function debtPayments()
+    {
+        return $this->hasMany(DebtPayment::class);
+    }
+
+    /**
      * Get or create the user's balance.
      */
     public function getOrCreateBalance(): Balance

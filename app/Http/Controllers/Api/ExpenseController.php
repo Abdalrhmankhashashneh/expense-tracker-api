@@ -233,7 +233,7 @@ class ExpenseController extends Controller
         if ($amountDiff != 0) {
             $balance = $request->user()->getOrCreateBalance();
             $categoryName = $expense->category?->name ?? 'Expense';
-            
+
             if ($amountDiff > 0) {
                 // Expense increased - deduct more
                 $balance->deductMoney($amountDiff, $expense->id, "Updated: {$categoryName}");
