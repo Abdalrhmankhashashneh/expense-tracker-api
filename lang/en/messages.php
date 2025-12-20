@@ -109,4 +109,22 @@ return [
         'profile_updated' => 'Profile updated successfully',
         'password_changed' => 'Password changed successfully. Please login again.',
     ],
+
+    // Currency
+    'currency' => [
+        'updated' => 'Currency preference updated successfully',
+        'inactive' => 'Selected currency is not available',
+    ],
+
+    // Debt
+    'debt' => [
+        'created' => 'Debt created successfully',
+        'updated' => 'Debt updated successfully',
+        'deleted' => 'Debt deleted successfully',
+        'payment_recorded' => 'Payment recorded successfully',
+        'payment_exceeds_remaining' => 'Payment amount exceeds remaining balance',
+    ],
+
+    // General
+    'unauthorized' => 'You are not authorized to perform this action',
 ];
