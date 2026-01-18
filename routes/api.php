@@ -13,6 +13,7 @@ use App\Http\Controllers\TargetController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\Api\ShareController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +37,9 @@ Route::prefix('auth')->group(function () {
         Route::get('/user', [AuthController::class, 'user']);
     });
 });
+
+// Public Share View Route (no authentication required)
+Route::get('/shared/{token}', [ShareController::class, 'viewShare']);
 
 // Protected Routes (Require Authentication)
 Route::middleware('auth:sanctum')->group(function () {
@@ -114,5 +118,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->middleware('permission:view settings');
         Route::put('/profile', [SettingsController::class, 'updateProfile'])->middleware('permission:update settings');
         Route::put('/password', [SettingsController::class, 'changePassword']);
+    });
+
+    // Share Management Routes
+    Route::prefix('shares')->group(function () {
+        Route::post('/', [ShareController::class, 'createShare']);
+        Route::get('/', [ShareController::class, 'getUserShares']);
+        Route::post('/{id}/revoke', [ShareController::class, 'revokeShare']);
+        Route::post('/{id}/resend-email', [ShareController::class, 'resendEmail']);
+        Route::delete('/{id}', [ShareController::class, 'deleteShare']);
     });
 });

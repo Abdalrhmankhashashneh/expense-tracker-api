@@ -127,6 +127,57 @@ The API will be available at `http://localhost:8000/api`
 | GET | `/api/export/excel` | Export as Excel |
 | GET | `/api/export/history` | Get export history |
 
+### Balance
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/balance` | Get current balance |
+| POST | `/api/balance/add` | Add money to balance |
+| GET | `/api/balance/transactions` | Get transaction history |
+| GET | `/api/balance/sources` | Get available transaction sources |
+
+### Debts
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/debts` | List all debts |
+| POST | `/api/debts` | Create debt |
+| GET | `/api/debts/{id}` | Get debt details |
+| PUT | `/api/debts/{id}` | Update debt |
+| DELETE | `/api/debts/{id}` | Delete debt |
+| GET | `/api/debts/statistics` | Get debt statistics |
+| POST | `/api/debts/{id}/payments` | Record debt payment |
+| GET | `/api/debts/{id}/payments` | Get debt payment history |
+
+### Lending
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/lendings` | List all lendings |
+| POST | `/api/lendings` | Create lending |
+| GET | `/api/lendings/{id}` | Get lending details |
+| PUT | `/api/lendings/{id}` | Update lending |
+| DELETE | `/api/lendings/{id}` | Delete lending |
+| POST | `/api/lendings/{id}/payments` | Record lending payment |
+| GET | `/api/lendings/{id}/payments` | Get lending payment history |
+| DELETE | `/api/lendings/{id}/payments/{payment}` | Delete lending payment |
+| POST | `/api/lendings/{id}/forgive` | Forgive lending |
+
+### Targets (Savings Goals)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/targets` | List all targets |
+| POST | `/api/targets` | Create target |
+| GET | `/api/targets/{id}` | Get target details |
+| PUT | `/api/targets/{id}` | Update target |
+| DELETE | `/api/targets/{id}` | Delete target |
+| POST | `/api/targets/{id}/purchase` | Purchase target item |
+
+### Currencies
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/currencies` | List all currencies |
+| GET | `/api/currencies/default` | Get default currency |
+| GET | `/api/currencies/active` | Get active currencies |
+| PUT | `/api/currencies/set` | Set user currency preference |
+
 ### Settings
 | Method | Endpoint | Description |
 |--------|----------|-------------|
