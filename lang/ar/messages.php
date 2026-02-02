@@ -25,6 +25,7 @@ return [
         'category' => 'الفئة',
         'user' => 'المستخدم',
         'export' => 'التصدير',
+        'common_expense' => 'المصروف الشائع',
     ],
 
     // Validation messages
@@ -92,6 +93,15 @@ return [
         'created' => 'تم إنشاء المصروف بنجاح',
         'updated' => 'تم تحديث المصروف بنجاح',
         'deleted' => 'تم حذف المصروف بنجاح',
+        'insufficient_balance' => 'رصيد غير كافٍ. رصيدك الحالي هو :balance، لكن مبلغ المصروف هو :amount.',
+    ],
+
+    // Common Expense (Templates)
+    'common_expense' => [
+        'created' => 'تم إنشاء قالب المصروف الشائع بنجاح',
+        'updated' => 'تم تحديث قالب المصروف الشائع بنجاح',
+        'deleted' => 'تم حذف قالب المصروف الشائع بنجاح',
+        'applied' => 'تم إنشاء المصروف من القالب بنجاح',
     ],
 
     // Category

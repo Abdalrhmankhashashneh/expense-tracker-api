@@ -25,6 +25,7 @@ return [
         'category' => 'Category',
         'user' => 'User',
         'export' => 'Export',
+        'common_expense' => 'Common Expense',
     ],
 
     // Validation messages
@@ -92,6 +93,15 @@ return [
         'created' => 'Expense created successfully',
         'updated' => 'Expense updated successfully',
         'deleted' => 'Expense deleted successfully',
+        'insufficient_balance' => 'Insufficient balance. Your current balance is :balance, but the expense amount is :amount.',
+    ],
+
+    // Common Expense (Templates)
+    'common_expense' => [
+        'created' => 'Common expense template created successfully',
+        'updated' => 'Common expense template updated successfully',
+        'deleted' => 'Common expense template deleted successfully',
+        'applied' => 'Expense created from template successfully',
     ],
 
     // Category

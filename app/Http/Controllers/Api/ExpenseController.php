@@ -122,11 +122,24 @@ class ExpenseController extends Controller
      */
     public function store(ExpenseRequest $request)
     {
+        // Check if user has sufficient balance
+        $balance = $request->user()->getOrCreateBalance();
+        $amount = $request->validated('amount');
+
+        if ($balance->current_balance < $amount) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.expense.insufficient_balance', [
+                    'balance' => number_format($balance->current_balance, 2),
+                    'amount' => number_format($amount, 2),
+                ]),
+            ], 422);
+        }
+
         $expense = $request->user()->expenses()->create($request->validated());
         $expense->load('category');
 
         // Deduct from user's balance
-        $balance = $request->user()->getOrCreateBalance();
         $categoryName = $expense->category?->name ?? 'Expense';
         $balance->deductMoney(
             $expense->amount,
@@ -225,11 +238,27 @@ class ExpenseController extends Controller
         $this->authorize('update', $expense);
 
         $oldAmount = $expense->amount;
+        $newAmount = $request->validated('amount');
+        $amountDiff = $newAmount - $oldAmount;
+
+        // Check if user has sufficient balance for the increased amount
+        if ($amountDiff > 0) {
+            $balance = $request->user()->getOrCreateBalance();
+            if ($balance->current_balance < $amountDiff) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.expense.insufficient_balance', [
+                        'balance' => number_format($balance->current_balance, 2),
+                        'amount' => number_format($amountDiff, 2),
+                    ]),
+                ], 422);
+            }
+        }
+
         $expense->update($request->validated());
         $expense->load('category');
 
         // Adjust balance if amount changed
-        $amountDiff = $expense->amount - $oldAmount;
         if ($amountDiff != 0) {
             $balance = $request->user()->getOrCreateBalance();
             $categoryName = $expense->category?->name ?? 'Expense';

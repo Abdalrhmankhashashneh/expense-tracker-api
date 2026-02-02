@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 /**
  * @OA\Info(
  *     version="1.0.0",
@@ -71,5 +73,5 @@ namespace App\Http\Controllers;
  */
 abstract class Controller
 {
-    //
+    use AuthorizesRequests;
 }

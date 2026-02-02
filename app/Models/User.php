@@ -104,6 +104,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get all common expense templates for the user.
+     */
+    public function commonExpenses()
+    {
+        return $this->hasMany(CommonExpense::class);
+    }
+
+    /**
      * Get custom categories created by the user.
      */
     public function categories()

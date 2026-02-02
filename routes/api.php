@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\ShareController;
+use App\Http\Controllers\Api\CommonExpenseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +57,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/summary', [ExpenseController::class, 'summary'])->middleware('permission:view expenses');
     });
     Route::apiResource('expenses', ExpenseController::class);
+
+    // Common Expense (Template) Management Routes
+    Route::post('common-expenses/{common_expense}/apply', [CommonExpenseController::class, 'apply']);
+    Route::apiResource('common-expenses', CommonExpenseController::class);
 
     // Category Management Routes
     Route::apiResource('categories', CategoryController::class);

@@ -60,6 +60,14 @@ class Category extends Model
     }
 
     /**
+     * Get all common expense templates for this category.
+     */
+    public function commonExpenses()
+    {
+        return $this->hasMany(CommonExpense::class);
+    }
+
+    /**
      * Get export history records for this category.
      */
     public function exportHistory()
