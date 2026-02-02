@@ -95,6 +95,9 @@ class DashboardController extends Controller
             ];
         })->sortBy('date')->values();
 
+        // Calculate financial status
+        $financialStatus = $this->calculateFinancialStatus($monthlyIncome, $totalExpenses);
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -103,6 +106,7 @@ class DashboardController extends Controller
                 'total_expenses' => number_format($totalExpenses, 2, '.', ''),
                 'remaining_balance' => number_format($remainingBalance, 2, '.', ''),
                 'spending_percentage' => round($spendingPercentage, 2),
+                'financial_status' => $financialStatus,
                 'top_category' => $topCategory ? [
                     'category' => $topCategory['category_name'],
                     'amount' => $topCategory['total_amount'],
@@ -112,6 +116,40 @@ class DashboardController extends Controller
                 'daily_expenses' => $dailyExpenses,
             ],
         ]);
+    }
+
+    /**
+     * Calculate financial status based on income vs expenses.
+     */
+    private function calculateFinancialStatus(float $income, float $expenses): array
+    {
+        $difference = $income - $expenses;
+        $percentageUsed = $income > 0 ? ($expenses / $income) * 100 : 0;
+
+        if ($income == 0) {
+            $status = 'no_income';
+            $severity = 'warning';
+        } elseif ($expenses > $income) {
+            $status = 'deficit';
+            $severity = 'danger';
+        } elseif ($expenses == $income) {
+            $status = 'break_even';
+            $severity = 'warning';
+        } elseif ($percentageUsed >= 80) {
+            $status = 'surplus';
+            $severity = 'warning'; // Close to budget limit
+        } else {
+            $status = 'surplus';
+            $severity = 'success';
+        }
+
+        return [
+            'status' => $status,
+            'severity' => $severity,
+            'difference' => number_format(abs($difference), 2, '.', ''),
+            'is_deficit' => $expenses > $income,
+            'percentage_used' => round($percentageUsed, 2),
+        ];
     }
 
     /**
