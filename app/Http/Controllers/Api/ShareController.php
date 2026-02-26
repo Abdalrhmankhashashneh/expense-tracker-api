@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\ShareToken;
 use App\Models\Debt;
 use App\Models\Lending;
+use App\Models\FriendRequest;
+use App\Models\User;
 use App\Mail\ShareNotification;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -23,9 +25,58 @@ class ShareController extends Controller
             'shareable_type' => ['required', Rule::in(['debt', 'lending'])],
             'shareable_id' => 'required|integer',
             'share_type' => ['required', Rule::in(ShareToken::SHARE_TYPES)],
-            'recipient_email' => 'required_if:share_type,email|nullable|email',
+            'recipient_email' => 'nullable|email',
+            'recipient_user_id' => 'nullable|integer|exists:users,id',
             'expires_in_days' => 'nullable|integer|min:1|max:365',
         ]);
+
+        $recipientEmail = null;
+
+        if (($validated['share_type'] ?? null) === ShareToken::TYPE_EMAIL) {
+            if (empty($validated['recipient_email']) && empty($validated['recipient_user_id'])) {
+                return response()->json([
+                    'message' => 'Recipient email or friend is required for email sharing.',
+                ], 422);
+            }
+
+            if (!empty($validated['recipient_user_id'])) {
+                $recipientUser = User::find($validated['recipient_user_id']);
+
+                if (!$recipientUser) {
+                    return response()->json([
+                        'message' => 'Selected friend was not found.',
+                    ], 404);
+                }
+
+                if ((int) $recipientUser->id === (int) $request->user()->id) {
+                    return response()->json([
+                        'message' => 'You cannot share with yourself.',
+                    ], 422);
+                }
+
+                $isFriend = FriendRequest::where('status', FriendRequest::STATUS_ACCEPTED)
+                    ->where(function ($query) use ($request, $recipientUser) {
+                        $query->where(function ($sub) use ($request, $recipientUser) {
+                            $sub->where('sender_id', $request->user()->id)
+                                ->where('receiver_id', $recipientUser->id);
+                        })->orWhere(function ($sub) use ($request, $recipientUser) {
+                            $sub->where('sender_id', $recipientUser->id)
+                                ->where('receiver_id', $request->user()->id);
+                        });
+                    })
+                    ->exists();
+
+                if (!$isFriend) {
+                    return response()->json([
+                        'message' => 'You can only share with accepted friends.',
+                    ], 403);
+                }
+
+                $recipientEmail = $recipientUser->email;
+            } else {
+                $recipientEmail = $validated['recipient_email'];
+            }
+        }
 
         // Map type to model class
         $modelClass = $validated['shareable_type'] === 'debt' ? Debt::class : Lending::class;
@@ -51,13 +102,13 @@ class ShareController extends Controller
             'shareable_type' => $modelClass,
             'shareable_id' => $resource->id,
             'share_type' => $validated['share_type'],
-            'recipient_email' => $validated['recipient_email'] ?? null,
+            'recipient_email' => $recipientEmail,
             'expires_at' => $expiresAt,
         ]);
 
         // Send email if share type is email
-        if ($validated['share_type'] === ShareToken::TYPE_EMAIL && !empty($validated['recipient_email'])) {
-            Mail::to($validated['recipient_email'])->send(
+        if ($validated['share_type'] === ShareToken::TYPE_EMAIL && !empty($recipientEmail)) {
+            Mail::to($recipientEmail)->send(
                 new ShareNotification($shareToken, $request->user())
             );
             $shareToken->update(['email_sent_at' => now()]);
@@ -152,6 +203,47 @@ class ShareController extends Controller
 
         return response()->json([
             'message' => 'Shares retrieved successfully.',
+            'data' => $shares,
+        ]);
+    }
+
+    /**
+     * Get shares received by the authenticated user.
+     */
+    public function getReceivedShares(Request $request): JsonResponse
+    {
+        $userEmail = trim((string) $request->user()->email);
+
+        if ($userEmail === '') {
+            return response()->json([
+                'message' => 'Received shares retrieved successfully.',
+                'data' => [],
+            ]);
+        }
+
+        $shares = ShareToken::valid()
+            ->where('share_type', ShareToken::TYPE_EMAIL)
+            ->whereRaw('LOWER(recipient_email) = ?', [mb_strtolower($userEmail)])
+            ->with(['shareable', 'user'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($share) {
+                return [
+                    'id' => $share->id,
+                    'token' => $share->token,
+                    'share_url' => $this->generateShareUrl($share),
+                    'shareable_type' => $share->shareable_type_name,
+                    'shareable_id' => $share->shareable_id,
+                    'shareable_name' => $this->getShareableName($share->shareable),
+                    'sender_name' => $share->user?->name,
+                    'recipient_email' => $share->recipient_email,
+                    'expires_at' => $share->expires_at?->toIso8601String(),
+                    'created_at' => $share->created_at->toIso8601String(),
+                ];
+            });
+
+        return response()->json([
+            'message' => 'Received shares retrieved successfully.',
             'data' => $shares,
         ]);
     }
@@ -275,6 +367,20 @@ class ShareController extends Controller
         ];
 
         if ($resource instanceof Debt) {
+            $paymentHistory = $resource->payments()
+                ->orderByDesc('payment_date')
+                ->orderByDesc('id')
+                ->limit(20)
+                ->get()
+                ->map(fn ($payment) => [
+                    'id' => $payment->id,
+                    'amount' => (float) $payment->amount,
+                    'payment_date' => $payment->payment_date?->toDateString(),
+                    'payment_method' => $payment->payment_method,
+                    'notes' => $payment->notes,
+                ])
+                ->values();
+
             return array_merge($base, [
                 'debtor_name' => $resource->debtor_name,
                 'debtor_phone' => $resource->debtor_phone,
@@ -291,10 +397,25 @@ class ShareController extends Controller
                 'due_date' => $resource->due_date?->toDateString(),
                 'start_date' => $resource->start_date?->toDateString(),
                 'status' => $resource->status,
+                'payment_history' => $paymentHistory,
             ]);
         }
 
         if ($resource instanceof Lending) {
+            $paymentHistory = $resource->payments()
+                ->orderByDesc('payment_date')
+                ->orderByDesc('id')
+                ->limit(20)
+                ->get()
+                ->map(fn ($payment) => [
+                    'id' => $payment->id,
+                    'amount' => (float) $payment->amount,
+                    'payment_date' => $payment->payment_date?->toDateString(),
+                    'payment_method' => $payment->payment_method,
+                    'notes' => $payment->notes,
+                ])
+                ->values();
+
             return array_merge($base, [
                 'borrower_name' => $resource->borrower_name,
                 'borrower_phone' => $resource->borrower_phone,
@@ -310,6 +431,7 @@ class ShareController extends Controller
                 'status' => $resource->status,
                 'is_overdue' => $resource->is_overdue,
                 'notes' => $resource->notes,
+                'payment_history' => $paymentHistory,
             ]);
         }
 

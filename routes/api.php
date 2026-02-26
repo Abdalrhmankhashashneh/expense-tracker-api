@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\ShareController;
+use App\Http\Controllers\Api\FriendController;
 use App\Http\Controllers\Api\CommonExpenseController;
 
 /*
@@ -129,8 +130,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('shares')->group(function () {
         Route::post('/', [ShareController::class, 'createShare']);
         Route::get('/', [ShareController::class, 'getUserShares']);
+        Route::get('/received', [ShareController::class, 'getReceivedShares']);
         Route::post('/{id}/revoke', [ShareController::class, 'revokeShare']);
         Route::post('/{id}/resend-email', [ShareController::class, 'resendEmail']);
         Route::delete('/{id}', [ShareController::class, 'deleteShare']);
+    });
+
+    // Friends Routes
+    Route::prefix('friends')->group(function () {
+        Route::get('/', [FriendController::class, 'index']);
+        Route::get('/search', [FriendController::class, 'search']);
+        Route::post('/request', [FriendController::class, 'sendRequest']);
+        Route::post('/requests/{id}/accept', [FriendController::class, 'accept']);
+        Route::post('/requests/{id}/reject', [FriendController::class, 'reject']);
+        Route::post('/requests/{id}/cancel', [FriendController::class, 'cancel']);
+        Route::delete('/{id}', [FriendController::class, 'remove']);
     });
 });

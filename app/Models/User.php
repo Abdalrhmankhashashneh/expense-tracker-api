@@ -160,6 +160,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Get friend requests sent by the user.
+     */
+    public function sentFriendRequests()
+    {
+        return $this->hasMany(FriendRequest::class, 'sender_id');
+    }
+
+    /**
+     * Get friend requests received by the user.
+     */
+    public function receivedFriendRequests()
+    {
+        return $this->hasMany(FriendRequest::class, 'receiver_id');
+    }
+
+    /**
      * Get or create the user's balance.
      */
     public function getOrCreateBalance(): Balance
