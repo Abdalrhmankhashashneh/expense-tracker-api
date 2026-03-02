@@ -118,6 +118,7 @@ return [
     'settings' => [
         'profile_updated' => 'تم تحديث الملف الشخصي بنجاح',
         'password_changed' => 'تم تغيير كلمة المرور بنجاح. يرجى تسجيل الدخول مرة أخرى.',
+        'preferences_updated' => 'تم تحديث التفضيلات بنجاح',
     ],
 
     // Currency
@@ -133,6 +134,8 @@ return [
         'deleted' => 'تم حذف الدين بنجاح',
         'payment_recorded' => 'تم تسجيل الدفعة بنجاح',
         'payment_exceeds_remaining' => 'مبلغ الدفع يتجاوز الرصيد المتبقي',
+        'refunded' => 'تم استرداد الدين بنجاح',
+        'nothing_to_refund' => 'لا يوجد مبلغ مدفوع لاسترداده لهذا الدين',
     ],
 
     // General

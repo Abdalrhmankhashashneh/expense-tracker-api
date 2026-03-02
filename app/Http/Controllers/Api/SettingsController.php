@@ -55,6 +55,31 @@ class SettingsController extends Controller
                     'date_format' => 'Y-m-d',
                     'first_day_of_week' => 'monday',
                     'language' => app()->getLocale(),
+                    'warn_before_balance_effect' => (bool) $user->warn_before_balance_effect,
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Update user preferences.
+     */
+    public function updatePreferences(Request $request)
+    {
+        $validated = $request->validate([
+            'warn_before_balance_effect' => ['required', 'boolean'],
+        ]);
+
+        $request->user()->update([
+            'warn_before_balance_effect' => $validated['warn_before_balance_effect'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.settings.preferences_updated'),
+            'data' => [
+                'preferences' => [
+                    'warn_before_balance_effect' => (bool) $request->user()->warn_before_balance_effect,
                 ],
             ],
         ]);

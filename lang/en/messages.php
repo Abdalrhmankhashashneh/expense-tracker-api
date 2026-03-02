@@ -118,6 +118,7 @@ return [
     'settings' => [
         'profile_updated' => 'Profile updated successfully',
         'password_changed' => 'Password changed successfully. Please login again.',
+        'preferences_updated' => 'Preferences updated successfully',
     ],
 
     // Currency
@@ -133,6 +134,8 @@ return [
         'deleted' => 'Debt deleted successfully',
         'payment_recorded' => 'Payment recorded successfully',
         'payment_exceeds_remaining' => 'Payment amount exceeds remaining balance',
+        'refunded' => 'Debt refunded successfully',
+        'nothing_to_refund' => 'There is no paid amount to refund for this debt',
     ],
 
     // General

@@ -44,6 +44,7 @@ class User extends Authenticatable
         'email',
         'password',
         'currency_id',
+        'warn_before_balance_effect',
     ];
 
     /**
@@ -66,6 +67,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'warn_before_balance_effect' => 'boolean',
         ];
     }
 

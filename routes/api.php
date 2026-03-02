@@ -88,6 +88,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/statistics', [DebtController::class, 'statistics']);
         Route::get('/{debt}/payments', [DebtController::class, 'payments']);
         Route::post('/{debt}/payments', [DebtController::class, 'recordPayment']);
+        Route::post('/{debt}/refund', [DebtController::class, 'refund']);
     });
     Route::apiResource('debts', DebtController::class);
 
@@ -96,6 +97,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{lending}/payments', [LendingController::class, 'getPayments']);
         Route::post('/{lending}/payments', [LendingController::class, 'recordPayment']);
         Route::delete('/{lending}/payments/{payment}', [LendingController::class, 'deletePayment']);
+        Route::post('/{lending}/refund', [LendingController::class, 'refund']);
         Route::post('/{lending}/forgive', [LendingController::class, 'forgive']);
     });
     Route::apiResource('lendings', LendingController::class);
@@ -123,6 +125,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('settings')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->middleware('permission:view settings');
         Route::put('/profile', [SettingsController::class, 'updateProfile'])->middleware('permission:update settings');
+        Route::put('/preferences', [SettingsController::class, 'updatePreferences'])->middleware('permission:update settings');
         Route::put('/password', [SettingsController::class, 'changePassword']);
     });
 

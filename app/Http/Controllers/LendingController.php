@@ -304,6 +304,49 @@ class LendingController extends Controller
     }
 
     /**
+     * Refund a lending (reverse received payments and finalize record).
+     */
+    public function refund(Lending $lending): JsonResponse
+    {
+        if ($lending->user_id !== auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+            ], 403);
+        }
+
+        $refundAmount = (float) $lending->remaining_amount;
+
+        DB::transaction(function () use ($lending, $refundAmount) {
+            if ($refundAmount > 0) {
+                $balance = Balance::firstOrCreate(
+                    ['user_id' => auth()->id()],
+                    ['current_balance' => 0]
+                );
+
+                $balance->refundLending(
+                    $refundAmount,
+                    $lending->id,
+                    $lending->borrower_name
+                );
+            }
+
+            $lending->payments()->delete();
+            $lending->remaining_amount = 0;
+            $lending->status = 'forgiven';
+            $lending->save();
+        });
+
+        $lending->load('payments');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lending refunded successfully',
+            'data' => $lending,
+        ]);
+    }
+
+    /**
      * Get payment history for a lending
      */
     public function getPayments(Lending $lending): JsonResponse

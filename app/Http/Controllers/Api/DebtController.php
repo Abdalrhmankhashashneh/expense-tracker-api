@@ -7,6 +7,7 @@ use App\Models\Debt;
 use App\Models\DebtPayment;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 /**
@@ -84,26 +85,37 @@ class DebtController extends Controller
             'total_amount' => ['required', 'numeric', 'min:0.01'],
             'priority' => ['required', Rule::in(Debt::PRIORITIES)],
             'payment_type' => ['required', Rule::in(Debt::PAYMENT_TYPES)],
-            'installment_amount' => ['nullable', 'numeric', 'min:0'],
+            'installment_amount' => ['nullable', 'required_if:payment_type,monthly,yearly', 'numeric', 'min:0.01'],
             'due_date' => ['nullable', 'date'],
             'start_date' => ['nullable', 'date'],
             'notes' => ['nullable', 'string'],
+            'add_to_balance' => ['nullable', 'boolean'],
         ]);
 
-        $debt = $request->user()->debts()->create([
-            'debtor_name' => $validated['debtor_name'],
-            'debtor_phone' => $validated['debtor_phone'] ?? null,
-            'debtor_email' => $validated['debtor_email'] ?? null,
-            'total_amount' => $validated['total_amount'],
-            'paid_amount' => 0,
-            'priority' => $validated['priority'],
-            'payment_type' => $validated['payment_type'],
-            'installment_amount' => $validated['installment_amount'] ?? null,
-            'due_date' => $validated['due_date'] ?? null,
-            'start_date' => $validated['start_date'] ?? now(),
-            'status' => Debt::STATUS_PENDING,
-            'notes' => $validated['notes'] ?? null,
-        ]);
+        $addToBalance = !empty($validated['add_to_balance']);
+
+        $debt = DB::transaction(function () use ($request, $validated, $addToBalance) {
+            $debt = $request->user()->debts()->create([
+                'debtor_name' => $validated['debtor_name'],
+                'debtor_phone' => $validated['debtor_phone'] ?? null,
+                'debtor_email' => $validated['debtor_email'] ?? null,
+                'total_amount' => $validated['total_amount'],
+                'paid_amount' => 0,
+                'priority' => $validated['priority'],
+                'payment_type' => $validated['payment_type'],
+                'installment_amount' => $validated['installment_amount'] ?? null,
+                'due_date' => $validated['due_date'] ?? null,
+                'start_date' => $validated['start_date'] ?? now(),
+                'status' => Debt::STATUS_PENDING,
+                'notes' => $validated['notes'] ?? null,
+            ]);
+
+            if ($addToBalance) {
+                $this->recordAutoPaymentWithBalanceEffect($request, $debt);
+            }
+
+            return $debt->fresh(['payments']);
+        });
 
         return response()->json([
             'success' => true,
@@ -153,19 +165,32 @@ class DebtController extends Controller
             'total_amount' => ['sometimes', 'numeric', 'min:0.01'],
             'priority' => ['sometimes', Rule::in(Debt::PRIORITIES)],
             'payment_type' => ['sometimes', Rule::in(Debt::PAYMENT_TYPES)],
-            'installment_amount' => ['nullable', 'numeric', 'min:0'],
+            'installment_amount' => ['nullable', 'required_if:payment_type,monthly,yearly', 'numeric', 'min:0.01'],
             'due_date' => ['nullable', 'date'],
             'start_date' => ['nullable', 'date'],
             'status' => ['sometimes', Rule::in(Debt::STATUSES)],
             'notes' => ['nullable', 'string'],
+            'add_to_balance' => ['nullable', 'boolean'],
         ]);
 
-        $debt->update($validated);
+        $addToBalance = !empty($validated['add_to_balance']);
+        unset($validated['add_to_balance']);
+
+        $debt = DB::transaction(function () use ($request, $debt, $validated, $addToBalance) {
+            $debt->update($validated);
+
+            if ($addToBalance) {
+                $debt->refresh();
+                $this->recordAutoPaymentWithBalanceEffect($request, $debt);
+            }
+
+            return $debt->fresh(['payments']);
+        });
 
         return response()->json([
             'success' => true,
             'message' => __('messages.debt.updated'),
-            'data' => $this->formatDebt($debt->fresh()),
+            'data' => $this->formatDebt($debt),
         ]);
     }
 
@@ -258,6 +283,52 @@ class DebtController extends Controller
     }
 
     /**
+     * Refund a debt and reverse balance impact.
+     */
+    public function refund(Request $request, Debt $debt): JsonResponse
+    {
+        if ($debt->user_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.unauthorized'),
+            ], 403);
+        }
+
+        $refundAmount = (float) $debt->paid_amount > 0
+            ? (float) $debt->paid_amount
+            : (float) $debt->total_amount;
+
+        if ($refundAmount <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.debt.nothing_to_refund'),
+            ], 422);
+        }
+
+        $debt = DB::transaction(function () use ($request, $debt, $refundAmount) {
+            $balance = $request->user()->getOrCreateBalance();
+            $balance->deductMoney(
+                $refundAmount,
+                null,
+                "Debt refund to {$debt->debtor_name}"
+            );
+
+            $debt->payments()->delete();
+            $debt->paid_amount = 0;
+            $debt->status = Debt::STATUS_CANCELLED;
+            $debt->save();
+
+            return $debt->fresh(['payments']);
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.debt.refunded'),
+            'data' => $this->formatDebt($debt),
+        ]);
+    }
+
+    /**
      * Get payment history for a debt.
      */
     public function payments(Request $request, Debt $debt): JsonResponse
@@ -338,5 +409,41 @@ class DebtController extends Controller
             'created_at' => $debt->created_at,
             'updated_at' => $debt->updated_at,
         ];
+    }
+
+    private function recordAutoPaymentWithBalanceEffect(Request $request, Debt $debt): ?DebtPayment
+    {
+        $computedAmount = $this->resolveAutoPaymentAmount($debt);
+        $remainingAmount = (float) $debt->remaining_amount;
+
+        if ($computedAmount <= 0 || $remainingAmount <= 0) {
+            return null;
+        }
+
+        $paymentAmount = min($computedAmount, $remainingAmount);
+
+        $balance = $request->user()->getOrCreateBalance();
+        $transaction = $balance->addMoney(
+            $paymentAmount,
+            'debt_payment',
+            "Debt payment from {$debt->debtor_name}"
+        );
+
+        return $debt->recordPayment(
+            $paymentAmount,
+            now()->toDateString(),
+            DebtPayment::METHOD_OTHER,
+            'Auto payment recorded from debt form',
+            $transaction->id
+        );
+    }
+
+    private function resolveAutoPaymentAmount(Debt $debt): float
+    {
+        if (in_array($debt->payment_type, [Debt::PAYMENT_MONTHLY, Debt::PAYMENT_YEARLY], true)) {
+            return (float) ($debt->installment_amount ?? 0);
+        }
+
+        return (float) $debt->total_amount;
     }
 }

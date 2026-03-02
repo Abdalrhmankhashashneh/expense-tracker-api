@@ -153,7 +153,13 @@ class Debt extends Model
     /**
      * Record a payment for this debt.
      */
-    public function recordPayment(float $amount, ?string $paymentDate = null, ?string $paymentMethod = null, ?string $notes = null): DebtPayment
+    public function recordPayment(
+        float $amount,
+        ?string $paymentDate = null,
+        ?string $paymentMethod = null,
+        ?string $notes = null,
+        ?int $balanceTransactionId = null
+    ): DebtPayment
     {
         $payment = $this->payments()->create([
             'user_id' => $this->user_id,
@@ -161,6 +167,7 @@ class Debt extends Model
             'payment_date' => $paymentDate ?? now()->toDateString(),
             'payment_method' => $paymentMethod,
             'notes' => $notes,
+            'balance_transaction_id' => $balanceTransactionId,
         ]);
 
         // Update paid amount
