@@ -56,6 +56,7 @@ class SettingsController extends Controller
                     'first_day_of_week' => 'monday',
                     'language' => app()->getLocale(),
                     'warn_before_balance_effect' => (bool) $user->warn_before_balance_effect,
+                    'warn_before_lending_effect' => (bool) $user->warn_before_lending_effect,
                 ],
             ],
         ]);
@@ -68,10 +69,12 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'warn_before_balance_effect' => ['required', 'boolean'],
+            'warn_before_lending_effect' => ['required', 'boolean'],
         ]);
 
         $request->user()->update([
             'warn_before_balance_effect' => $validated['warn_before_balance_effect'],
+            'warn_before_lending_effect' => $validated['warn_before_lending_effect'],
         ]);
 
         return response()->json([
@@ -80,6 +83,7 @@ class SettingsController extends Controller
             'data' => [
                 'preferences' => [
                     'warn_before_balance_effect' => (bool) $request->user()->warn_before_balance_effect,
+                    'warn_before_lending_effect' => (bool) $request->user()->warn_before_lending_effect,
                 ],
             ],
         ]);

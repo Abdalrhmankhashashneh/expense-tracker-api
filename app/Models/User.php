@@ -45,6 +45,7 @@ class User extends Authenticatable
         'password',
         'currency_id',
         'warn_before_balance_effect',
+        'warn_before_lending_effect',
     ];
 
     /**
@@ -68,6 +69,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'warn_before_balance_effect' => 'boolean',
+            'warn_before_lending_effect' => 'boolean',
         ];
     }
 
