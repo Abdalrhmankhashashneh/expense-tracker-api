@@ -15,6 +15,8 @@ use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\ShareController;
 use App\Http\Controllers\Api\FriendController;
+use App\Http\Controllers\Api\AdminUserController;
+use App\Http\Controllers\Api\AdminDashboardController;
 use App\Http\Controllers\Api\CommonExpenseController;
 
 /*
@@ -148,5 +150,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/requests/{id}/reject', [FriendController::class, 'reject']);
         Route::post('/requests/{id}/cancel', [FriendController::class, 'cancel']);
         Route::delete('/{id}', [FriendController::class, 'remove']);
+    });
+
+    // Admin Routes (Require admin role)
+    Route::prefix('admin')->middleware('role:admin')->group(function () {
+        // Dashboard / System Stats
+        Route::get('/dashboard', [AdminDashboardController::class, 'overview']);
+
+        // User Management
+        Route::get('/users', [AdminUserController::class, 'index']);
+        Route::post('/users', [AdminUserController::class, 'store']);
+        Route::get('/users/{user}', [AdminUserController::class, 'show']);
+        Route::put('/users/{user}', [AdminUserController::class, 'update']);
+        Route::delete('/users/{user}', [AdminUserController::class, 'destroy']);
+        Route::post('/users/{user}/reset-password', [AdminUserController::class, 'resetPassword']);
+        Route::post('/users/{user}/ban', [AdminUserController::class, 'ban']);
+        Route::post('/users/{user}/unban', [AdminUserController::class, 'unban']);
     });
 });

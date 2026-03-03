@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -54,6 +55,8 @@ class AuthController extends Controller
         // Assign default 'user' role
         $user->assignRole('user');
 
+        ActivityLogService::log($user->id, 'register', 'auth', 'User registered', $request);
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -62,6 +65,7 @@ class AuthController extends Controller
             'data' => [
                 'user' => new UserResource($user),
                 'token' => $token,
+                'roles' => $user->getRoleNames(),
             ],
         ], 201);
     }
@@ -103,6 +107,14 @@ class AuthController extends Controller
             ]);
         }
 
+        if ($user->isBanned()) {
+            throw ValidationException::withMessages([
+                'email' => [__('messages.auth.account_banned')],
+            ]);
+        }
+
+        ActivityLogService::log($user->id, 'login', 'auth', 'User logged in', $request);
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -110,6 +122,7 @@ class AuthController extends Controller
             'data' => [
                 'user' => new UserResource($user),
                 'token' => $token,
+                'roles' => $user->getRoleNames(),
             ],
         ]);
     }

@@ -48,6 +48,12 @@ class RolePermissionSeeder extends Seeder
             // Settings permissions
             'update settings',
             'view settings',
+
+            // Admin permissions
+            'manage users',
+            'ban users',
+            'view admin dashboard',
+            'view activity logs',
         ];
 
         foreach ($permissions as $permission) {

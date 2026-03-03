@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             CurrencySeeder::class,
             RolePermissionSeeder::class,
             CategorySeeder::class,
+            AdminSeeder::class,
         ]);
 
         // User::factory(10)->create();

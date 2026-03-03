@@ -60,6 +60,7 @@ return [
         'logout_success' => 'Logout successful',
         'register_success' => 'Registration successful',
         'invalid_credentials' => 'Invalid email or password',
+        'account_banned' => 'Your account has been suspended. Please contact support.',
         'invalid_current_password' => 'Current password is incorrect',
         'token_expired' => 'Token has expired',
     ],
@@ -140,4 +141,16 @@ return [
 
     // General
     'unauthorized' => 'You are not authorized to perform this action',
+
+    // Admin
+    'admin' => [
+        'user_created' => 'User created successfully',
+        'user_updated' => 'User updated successfully',
+        'user_deleted' => 'User deleted successfully',
+        'user_banned' => 'User has been banned',
+        'user_unbanned' => 'User has been unbanned',
+        'password_reset' => 'Password has been reset successfully',
+        'cannot_ban_self' => 'You cannot ban your own account',
+        'cannot_delete_self' => 'You cannot delete your own account',
+    ],
 ];

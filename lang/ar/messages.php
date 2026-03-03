@@ -60,6 +60,7 @@ return [
         'logout_success' => 'تم تسجيل الخروج بنجاح',
         'register_success' => 'تم التسجيل بنجاح',
         'invalid_credentials' => 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+        'account_banned' => 'تم تعليق حسابك. يرجى التواصل مع الدعم.',
         'invalid_current_password' => 'كلمة المرور الحالية غير صحيحة',
         'token_expired' => 'انتهت صلاحية الرمز',
     ],
@@ -140,4 +141,16 @@ return [
 
     // General
     'unauthorized' => 'غير مصرح لك بتنفيذ هذا الإجراء',
+
+    // Admin
+    'admin' => [
+        'user_created' => 'تم إنشاء المستخدم بنجاح',
+        'user_updated' => 'تم تحديث المستخدم بنجاح',
+        'user_deleted' => 'تم حذف المستخدم بنجاح',
+        'user_banned' => 'تم حظر المستخدم',
+        'user_unbanned' => 'تم إلغاء حظر المستخدم',
+        'password_reset' => 'تم إعادة تعيين كلمة المرور بنجاح',
+        'cannot_ban_self' => 'لا يمكنك حظر حسابك الخاص',
+        'cannot_delete_self' => 'لا يمكنك حذف حسابك الخاص',
+    ],
 ];

@@ -46,6 +46,9 @@ class User extends Authenticatable
         'currency_id',
         'warn_before_balance_effect',
         'warn_before_lending_effect',
+        'is_banned',
+        'banned_at',
+        'ban_reason',
     ];
 
     /**
@@ -56,6 +59,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'ban_reason',
+        'banned_at',
     ];
 
     /**
@@ -70,6 +75,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'warn_before_balance_effect' => 'boolean',
             'warn_before_lending_effect' => 'boolean',
+            'is_banned' => 'boolean',
+            'banned_at' => 'datetime',
         ];
     }
 
@@ -177,6 +184,46 @@ class User extends Authenticatable
     public function receivedFriendRequests()
     {
         return $this->hasMany(FriendRequest::class, 'receiver_id');
+    }
+
+    /**
+     * Get activity logs for the user.
+     */
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
+
+    /**
+     * Get all lendings for the user.
+     */
+    public function lendings()
+    {
+        return $this->hasMany(Lending::class);
+    }
+
+    /**
+     * Get all targets for the user.
+     */
+    public function targets()
+    {
+        return $this->hasMany(Target::class);
+    }
+
+    /**
+     * Check if the user is banned.
+     */
+    public function isBanned(): bool
+    {
+        return (bool) $this->is_banned;
+    }
+
+    /**
+     * Check if the user is an admin.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin');
     }
 
     /**
