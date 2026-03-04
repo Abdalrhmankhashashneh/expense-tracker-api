@@ -92,9 +92,7 @@ class DebtController extends Controller
             'add_to_balance' => ['nullable', 'boolean'],
         ]);
 
-        $addToBalance = !empty($validated['add_to_balance']);
-
-        $debt = DB::transaction(function () use ($request, $validated, $addToBalance) {
+        $debt = DB::transaction(function () use ($request, $validated) {
             $debt = $request->user()->debts()->create([
                 'debtor_name' => $validated['debtor_name'],
                 'debtor_phone' => $validated['debtor_phone'] ?? null,
@@ -109,10 +107,6 @@ class DebtController extends Controller
                 'status' => Debt::STATUS_PENDING,
                 'notes' => $validated['notes'] ?? null,
             ]);
-
-            if ($addToBalance) {
-                $this->recordAutoPaymentWithBalanceEffect($request, $debt);
-            }
 
             return $debt->fresh(['payments']);
         });
@@ -173,16 +167,10 @@ class DebtController extends Controller
             'add_to_balance' => ['nullable', 'boolean'],
         ]);
 
-        $addToBalance = !empty($validated['add_to_balance']);
         unset($validated['add_to_balance']);
 
-        $debt = DB::transaction(function () use ($request, $debt, $validated, $addToBalance) {
+        $debt = DB::transaction(function () use ($debt, $validated) {
             $debt->update($validated);
-
-            if ($addToBalance) {
-                $debt->refresh();
-                $this->recordAutoPaymentWithBalanceEffect($request, $debt);
-            }
 
             return $debt->fresh(['payments']);
         });
